@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title> Calculator</title>
+    <link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet" />
+    <script src="lib/Jquery/jquery.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        .even {
+            color: #28a745;
+        }
+        .odd {
+            color: #ff0000;  
+        }
+        .check {
+            padding-top: 30px;
+        }
+        .btnCalc{
+            padding-top:30px;
+        }
+    </style>
+    <script>
+        var firstNum, secondNum, operator, result, colored , evenOrOdd = true;
+        $(document).ready(function () {
+            var url = "https://localhost:44334/api/calculator";
+            $('input[type="checkbox"]').change(function () {
+                if ($(this).is(':checked')) {
+                    colored = true;
+                }
+                else{
+                    colored = false;
+                }
+            });
+            $('#btnCalc').click(function () {
+                firstNum = parseInt( $('#firstNumber').val());
+                secondNum = $('#secondNumber').val();
+                operator = $( "#operators option:selected" ).text();;
+                var JsonData = { "firstNumber": firstNum, "SecondNumber": secondNum, "Operators": operator, "Colored": colored};
+                $.ajax({
+                    "type": "POST",
+                    "url": url,
+                    "contentType": "application/json; charset=utf-8",
+                    "dataType": "json",
+                    data: JSON.stringify(JsonData),
+                    success: function (data) {
+                        $('#result').val(data.result);
+                        evenOrOdd = data.evenOrOdd;
+                        if (data.colored == true) {
+                            FormatResult(evenOrOdd);
+                        }
+                        else if (data.colored == false) {
+                            $('#result').removeClass('odd even');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = xhr.status + ': ' + xhr.statusText;
+                        alert(errorMessage);
+                    }
+                });
+            });
+        });
+
+        function FormatResult(evenOrOdd) {
+            if (evenOrOdd == true) {
+                $('#result').removeClass('odd')
+                $('#result').addClass('even');
+            }
+            else{
+                $('#result').addClass('odd');
+            } 
+        }
+       
+
+    </script>
+</head>
+<body>
+    <div class="jumbotron">
+        <h2 class="text-capitalize text-center">Calculator</h2>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <label for="firstNumber">First Number</label>
+                <input type="number" id="firstNumber" class="form-control" placeholder="First Number" />
+            </div>
+            <div class="col-md-1">
+                <label for="operators" class="col-lg-2">Operator</label>
+                <select id="operators" class="form-control">
+                    <option>+</option>
+                    <option>-</option>
+                    <option>*</option>
+                    <option>/</option>
+                    <option>^</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="secondNumber">Second Number</label>
+                <input type="number" id="secondNumber" class="form-control" placeholder="Second Number" />
+            </div>           
+            <label style="padding-top:30px;font-size:x-large">=</label>
+            <div class="col-md-2">
+                <label for="result">Result</label>
+                <input type="number" id="result" class="form-control" disabled />
+            </div>
+            <div class="col-md-1">
+                <label class="check"><input type="checkbox" value="" id="colored" class="form-check-input ">Color Display?</label>
+            </div>
+            <div class="col-md-1 btnCalc">
+                <input type="submit" value="Submit" id="btnCalc" class="btn btn-primary " />
+            </div>
+        </div>
+    </div>
+</body>
+</html>
